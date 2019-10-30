@@ -242,7 +242,7 @@ diskimages:
       # BASE_IMAGE_FILE: CentOS-7-x86_64-GenericCloud-1907.qcow2.xz
       # DIB_CLOUD_IMAGES: https://cloud.centos.org/centos/7/images
       # DIB_KERNEL_VERSION: 3.10.0-957
-      DIB_DISABLE_KERNEL_CLEANUP: '1'
+      DIB_DISABLE_KERNEL_CLEANUP: '0'
       # DIB_BAREMETAL_KERNEL_PATTERN: "*3.10.0-957*"
       # DIB_BAREMETAL_INITRD_PATTERN: "*3.10.0-957*"
 
