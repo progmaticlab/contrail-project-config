@@ -22,7 +22,7 @@ log "Publish TF container"
 
 [ -z "$CONTRAIL_REGISTRY" ] && { err "empty CONTRAIL_REGISTRY" && exit -1; }
 [ -z "$CONTAINER_TAG" ] && { err "empty CONTAINER_TAG" && exit -1; }
-[ -z "$PUBLISH_TAG" ] && { err "empty PUBLISH_TAG" && exit -1; }
+[ -z "$PUBLISH_TAGS" ] && { err "empty PUBLISH_TAGS" && exit -1; }
 
 CONTRAIL_REGISTRY_INSECURE=${CONTRAIL_REGISTRY_INSECURE:-"true"}
 PUBLISH_REGISTRY=${PUBLISH_REGISTRY:-}
@@ -113,19 +113,29 @@ function do_publish() {
     return 1  
   fi
 
-  local target_tag="$PUBLISH_REGISTRY"
-  [ -n "$target_tag" ] && target_tag+="/"
-  target_tag+="${container}:${PUBLISH_TAG}"
-  log "Publish $target_tag started"
-  if ! run_with_retry docker tag ${full_name} ${target_tag} ; then
-    err "Failed to execute docker tag ${full_name} ${target_tag}"
-    return 1  
+  local t=''
+  local ret=0
+  for t in ${PUBLISH_TAGS//,/ } ; do
+    local target_tag="$PUBLISH_REGISTRY"
+    [ -n "$target_tag" ] && target_tag+="/"
+    target_tag+="${container}:${t}"
+    log "Publish $target_tag started"
+    if ! run_with_retry docker tag ${full_name} ${target_tag} ; then
+      err "Failed to execute docker tag ${full_name} ${target_tag}"
+      ret=1
+      continue
+    fi
+    if ! run_with_retry docker push $target_tag ; then
+      err "Failed to execute docker push $target_tag"
+      ret=1
+    fi
+  done
+  if [[ $ret == 0 ]] ; then
+    log "Publish $container finished succesfully"
+  else
+    err "Failed to publish $container"
   fi
-  if ! run_with_retry docker push $target_tag ; then
-    err "Failed to execute docker push $target_tag"
-    return 1
-  fi
-  log "Publish $container finished succesfully"
+  return $ret
 }
 
 jobs=""

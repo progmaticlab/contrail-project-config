@@ -29,12 +29,12 @@
 
 - name: define containers publish tag as current date 
   set_fact:
-    PUBLISH_TAG: "{{ ansible_date_time.date }}"
+    PUBLISH_TAGS: "{{ ansible_date_time.date }},latest"
   when: not stable
 
 - name: define containers publish tag as current date stable
   set_fact:
-    PUBLISH_TAG: "{{ ansible_date_time.date }}-stable"
+    PUBLISH_TAGS: "{{ ansible_date_time.date }}-stable,latest-stable"
   when: stable
 
 - name: copy publish script to target machine
