@@ -45,29 +45,31 @@
 
     experimental:
       jobs:
-        - contrail-sanity-centos7-k8s-manifest-aio
+        - contrail-sanity-centos7-k8s-manifest-aio:
+            vars:
+              contrail_version: '{{ packaging.version.public }}-nightly'
 
     experimental-sanity:
       jobs:
         - contrail-sanity-centos7-kolla-ocata:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
         - contrail-sanity-centos7-kolla-queens:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
         - contrail-sanity-centos7-kolla-queens-multinode:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
         - contrail-sanity-centos7-k8s:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
         #- contrail-charms-xenial:
         #    vars:
-        #      contrail_version: '{{ packaging.version.public }}-latest'
+        #      contrail_version: '{{ packaging.version.public }}-nightly'
         #      contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
 
 - project-template:
@@ -89,7 +91,7 @@
       jobs:
         - contrail-sanity-ubuntu1604-helm-ocata:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
 
 - project-template:
@@ -105,7 +107,7 @@
       jobs:
         - contrail-sanity-rhel7-openshift-3.9:
             vars:
-              contrail_version: '{{ packaging.version.public }}-latest'
+              contrail_version: '{{ packaging.version.public }}-nightly'
               contrail_docker_registry: '{{ nexus.fqdn }}:{{ nexus.registry.tungsten_ci }}'
 
 - project-template:
