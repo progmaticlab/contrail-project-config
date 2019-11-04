@@ -57,7 +57,7 @@ providers:
         username: ubuntu
     pools:
       - name: ci-zuulv3-aws
-        max-servers: 10
+        max-servers: 0
         subnets:
           - subnet-05151ae63f9d5eef3
           - subnet-011df0d7f9ce7d79d
