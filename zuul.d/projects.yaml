@@ -553,3 +553,8 @@
     name: tungstenfabric/tf-devstack
     templates:
       - noops
+
+- project:
+    name: tungstenfabric/tf-test
+    templates:
+      - noops
