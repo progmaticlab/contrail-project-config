@@ -16,13 +16,13 @@ labels:
     min-ready: 0
   - name: centos-7-large
     min-ready: 0
+  - name: centos-7-sanity
+    min-ready: 0
   - name: rhel-7-medium
     min-ready: 0
   - name: ubuntu-xenial-xsmall
     min-ready: 0
   - name: ubuntu-xenial-medium
-    min-ready: 0
-  - name: ubuntu-xenial-large
     min-ready: 0
   - name: ubuntu-bionic-xsmall
     min-ready: 0
@@ -100,12 +100,6 @@ providers:
             volume-size: 120
             console-log: True
             key-name: ci-infra-shared-key
-          - name: ubuntu-xenial-large
-            instance-type: m5.2xlarge
-            cloud-image: ubuntu-xenial
-            volume-size: 120
-            console-log: True
-            key-name: ci-infra-shared-key
           - name: ubuntu-bionic-xsmall
             instance-type: t2.small
             cloud-image: ubuntu-bionic
@@ -130,6 +124,7 @@ providers:
   # v2-standard-2   2       8 GB
   # v2-standard-4   4       16 GB
   # v2-standard-8   8       32 GB
+  # v2-highcpu-32  32       32 GB
   - name: tf-ci
     region-name: "sjc1"
     cloud: tf-ci
@@ -174,6 +169,12 @@ providers:
             console-log: True
             key-name: ci-infra-shared-key
             boot-from-volume: 1
+          - name: centos-7-sanity
+            flavor-name: v2-highcpu-32
+            diskimage: centos-7
+            console-log: True
+            key-name: ci-infra-shared-key
+            boot-from-volume: 1
           - name: rhel-7-medium
             flavor-name: v2-standard-4
             diskimage: rhel-7
@@ -192,31 +193,6 @@ providers:
             console-log: True
             key-name: ci-infra-shared-key
             boot-from-volume: 1
-          - name: ubuntu-xenial-large
-            flavor-name: v2-standard-8
-            diskimage: ubuntu-xenial
-            console-log: True
-            key-name: ci-infra-shared-key
-            boot-from-volume: 1
-# TODO: rework bionic diskimage - now gets squashfs image and cannot unsquash it
-          # - name: ubuntu-bionic-xsmall
-          #   flavor-name: v2-standard-1
-          #   diskimage: ubuntu-bionic
-          #   console-log: True
-          #   key-name: ci-infra-shared-key
-          #   boot-from-volume: 1
-          # - name: ubuntu-bionic-medium
-          #   flavor-name: v2-standard-4
-          #   diskimage: ubuntu-bionic
-          #   console-log: True
-          #   key-name: ci-infra-shared-key
-          #   boot-from-volume: 1
-          # - name: ubuntu-bionic-large
-          #   flavor-name: v2-standard-8
-          #   diskimage: ubuntu-bionic
-          #   console-log: True
-          #   key-name: ci-infra-shared-key
-          #   boot-from-volume: 1
 
 diskimages:
   - name: centos-7
@@ -295,27 +271,3 @@ diskimages:
       DIB_DEBOOTSTRAP_EXTRA_ARGS: '--no-check-gpg'
       DIB_DEBIAN_COMPONENTS: 'main,universe'
       DIB_TOX_VERSION: '3.1.3'
-# TODO: rework bionic diskimage - now gets squashfs image and cannot unsquash it 
-#   - name: ubuntu-bionic
-#     elements:
-#       - ubuntu
-#       - vm
-#       - growroot
-#       - pip-and-virtualenv
-#       - tox
-#       - nodepool-base
-#       - contrail-builder
-#     release: bionic
-#     formats:
-#       - qcow2
-#     env-vars:
-#       TMPDIR: /opt/dib_tmp
-#       DIB_CHECKSUM: '1'
-#       DIB_IMAGE_CACHE: /opt/dib_cache
-#       DIB_APT_LOCAL_CACHE: '0'
-#       DIB_DISABLE_APT_CLEANUP: '1'
-#       DIB_GRUB_TIMEOUT: '0'
-#       DIB_DISTRIBUTION_MIRROR: 'http://nexus/repository/ubuntu'
-#       DIB_DEBOOTSTRAP_EXTRA_ARGS: '--no-check-gpg'
-#       DIB_DEBIAN_COMPONENTS: 'main,universe'
-#       DIB_TOX_VERSION: '3.1.3'
