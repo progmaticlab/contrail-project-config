@@ -170,7 +170,7 @@ providers:
             key-name: ci-infra-shared-key
             boot-from-volume: 1
           - name: centos-7-sanity
-            flavor-name: v2-highcpu-32
+            flavor-name: v2-standard-8
             diskimage: centos-7
             console-log: True
             key-name: ci-infra-shared-key
