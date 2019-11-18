@@ -81,38 +81,33 @@ if [[ -z "$repos" ]] ; then
   exit -1
 fi
 
-function get_container_full_name() {
+function get_container_full_name_list() {
   local container=$1
   local registry=$(echo $container | cut -s -d '/' -f 1)
   local name=$(echo $container | cut -s -d '/' -f 2,3)
-  local full_name=$container
+  local full_names=$container
   if [ -z "$name" ] ; then
     # just short name, loopup the tag
     local tags=$(run_with_retry curl -s --show-error ${contrail_registry_url}/v2/$container/tags/list | jq -c -r '.tags[]')
-    if ! echo "$tags" | grep -q "^$CONTAINER_TAG\$" ; then
-      warn "No requested tag $CONTAINER_TAG in available tags for $container:"$tags
+    if echo "$tags" | grep -q "^$CONTAINER_TAG\$" ; then
+      full_names="${CONTRAIL_REGISTRY}/${container}:${CONTAINER_TAG}"
+    elif echo "$tags" | grep -q "^\(\(queens\)\|\(rocky\)\|\(stein\)\)-$CONTAINER_TAG\$"
+      full_names=$(echo "$tags" | awk "/^(queens|rocky|stein)-$CONTAINER_TAG\$/{print(\"${CONTRAIL_REGISTRY}/${container}:\"\$0)}")
+    else 
+      warn "No requested tag $CONTAINER_TAG in available tags for $container , available tags: "$tags
       return 1
     fi
-    full_name="${CONTRAIL_REGISTRY}/${container}:${CONTAINER_TAG}"
   fi
-  echo $full_name
+  echo "$full_names"
 }
 
-function do_publish() {
-  local container=$1
-
-  local full_name=$(get_container_full_name $container)
-  if [[ "$?" != "0" || -z "$full_name" ]] ; then
-    warn "$container skipped"
-    return 0
-  fi
-  
+function do_publish_impl() {
+  local full_name=$1
   log "Pull $full_name"
   if ! run_with_retry docker pull $full_name ; then
     err "Failed to execute docker pull ${full_name}"
     return 1  
   fi
-
   local t=''
   local ret=0
   for t in ${PUBLISH_TAGS//,/ } ; do
@@ -128,13 +123,26 @@ function do_publish() {
     if ! run_with_retry docker push $target_tag ; then
       err "Failed to execute docker push $target_tag"
       ret=1
+      continue
     fi
+    log "Publish $full_name as $target_tag finished succesfully"
   done
-  if [[ $ret == 0 ]] ; then
-    log "Publish $container finished succesfully"
-  else
-    err "Failed to publish $container"
+  return $ret
+}
+
+function do_publish() {
+  local container=$1
+
+  local full_name_list=$(get_container_full_name_list $container)
+  if [[ "$?" != "0" || -z "$full_name" ]] ; then
+    warn "$container skipped"
+    return 0
   fi
+  local ret=0
+  local full_name=''
+  for full_name in $full_name_list ; do
+    do_publish_impl $full_name || ret=1
+  done
   return $ret
 }
 
