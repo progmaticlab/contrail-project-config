@@ -91,7 +91,7 @@ function get_container_full_name_list() {
     local tags=$(run_with_retry curl -s --show-error ${contrail_registry_url}/v2/$container/tags/list | jq -c -r '.tags[]')
     if echo "$tags" | grep -q "^$CONTAINER_TAG\$" ; then
       full_names="${CONTRAIL_REGISTRY}/${container}:${CONTAINER_TAG}"
-    elif echo "$tags" | grep -q "^\(\(queens\)\|\(rocky\)\|\(stein\)\)-$CONTAINER_TAG\$"
+    elif echo "$tags" | grep -q "^\(\(queens\)\|\(rocky\)\|\(stein\)\)-$CONTAINER_TAG\$" ; then
       full_names=$(echo "$tags" | awk "/^(queens|rocky|stein)-$CONTAINER_TAG\$/{print(\"${CONTRAIL_REGISTRY}/${container}:\"\$0)}")
     else 
       warn "No requested tag $CONTAINER_TAG in available tags for $container , available tags: "$tags
