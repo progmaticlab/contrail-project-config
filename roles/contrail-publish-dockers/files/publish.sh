@@ -83,18 +83,19 @@ fi
 
 function get_container_full_name_list() {
   local container=$1
+  local lookup_tag=$2
   local registry=$(echo $container | cut -s -d '/' -f 1)
   local name=$(echo $container | cut -s -d '/' -f 2,3)
   local full_names=$container
   if [ -z "$name" ] ; then
     # just short name, loopup the tag
     local tags=$(run_with_retry curl -s --show-error ${contrail_registry_url}/v2/$container/tags/list | jq -c -r '.tags[]')
-    if echo "$tags" | grep -q "^$CONTAINER_TAG\$" ; then
-      full_names="${CONTRAIL_REGISTRY}/${container}:${CONTAINER_TAG}"
-    elif echo "$tags" | grep -q "^\(\(queens\)\|\(rocky\)\|\(stein\)\)-$CONTAINER_TAG\$" ; then
-      full_names=$(echo "$tags" | awk "/^(queens|rocky|stein)-$CONTAINER_TAG\$/{print(\"${CONTRAIL_REGISTRY}/${container}:\"\$0)}")
+    if echo "$tags" | grep -q "^$lookup_tag\$" ; then
+      full_names="${CONTRAIL_REGISTRY}/${container}:${lookup_tag}"
+    elif echo "$tags" | grep -q "^\(\(queens\)\|\(rocky\)\|\(stein\)\)-$lookup_tag\$" ; then
+      full_names=$(echo "$tags" | awk "/^(queens|rocky|stein)-$lookup_tag\$/{print(\"${CONTRAIL_REGISTRY}/${container}:\"\$0)}")
     else 
-      warn "No requested tag $CONTAINER_TAG in available tags for $container , available tags: "$tags
+      warn "No requested tag $lookup_tag in available tags for $container , available tags: "$tags
       return 1
     fi
   fi
@@ -103,6 +104,7 @@ function get_container_full_name_list() {
 
 function do_publish_impl() {
   local full_name=$1
+  local target_tags=$2
   log "Pull $full_name"
   if ! run_with_retry docker pull $full_name ; then
     err "Failed to execute docker pull ${full_name}"
@@ -110,7 +112,7 @@ function do_publish_impl() {
   fi
   local t=''
   local ret=0
-  for t in ${PUBLISH_TAGS//,/ } ; do
+  for t in ${target_tags//,/ } ; do
     local target_tag="$PUBLISH_REGISTRY"
     [ -n "$target_tag" ] && target_tag+="/"
     target_tag+="${container}:${t}"
@@ -133,7 +135,7 @@ function do_publish_impl() {
 function do_publish() {
   local container=$1
 
-  local full_name_list=$(get_container_full_name_list $container)
+  local full_name_list=$(get_container_full_name_list $container $CONTAINER_TAG)
   if [[ "$?" != "0" || -z "$full_name" ]] ; then
     warn "$container skipped"
     return 0
@@ -141,7 +143,13 @@ function do_publish() {
   local ret=0
   local full_name=''
   for full_name in $full_name_list ; do
-    do_publish_impl $full_name || ret=1
+    local os=$(echo $full_name | awk -F ':' '{print($NF)}' | sed "s/\-$CONTAINER_TAG//g" | grep '\(queens\)\|\(rocky\)\|\(stein\)')
+    if [ -n "$os" ] ; then
+      local tags="${os}-${PUBLISH_TAGS//,/,${os}-}"
+    else
+      local tags=$PUBLISH_TAGS
+    fi
+    do_publish_impl $full_name $tags || ret=1
   done
   return $ret
 }
