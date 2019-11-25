@@ -20,6 +20,8 @@ labels:
     min-ready: 0
   - name: rhel-7-medium
     min-ready: 0
+  - name: rhel-7-large
+    min-ready: 0
   - name: ubuntu-xenial-xsmall
     min-ready: 0
   - name: ubuntu-xenial-medium
@@ -84,6 +86,10 @@ providers:
             key-name: ci-infra-shared-key
           - name: rhel-7-medium
             instance-type: t2.xlarge
+            cloud-image: rhel-7
+            volume-size: 120
+          - name: rhel-7-large
+            instance-type: m4.2xlarge
             cloud-image: rhel-7
             volume-size: 120
             console-log: True
@@ -177,6 +183,12 @@ providers:
             boot-from-volume: 1
           - name: rhel-7-medium
             flavor-name: v2-standard-4
+            diskimage: rhel-7
+            console-log: True
+            key-name: ci-infra-shared-key
+            boot-from-volume: 1
+          - name: rhel-7-large
+            flavor-name: v2-standard-8
             diskimage: rhel-7
             console-log: True
             key-name: ci-infra-shared-key
