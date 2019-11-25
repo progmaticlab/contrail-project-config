@@ -88,6 +88,8 @@ providers:
             instance-type: t2.xlarge
             cloud-image: rhel-7
             volume-size: 120
+            console-log: True
+            key-name: ci-infra-shared-key
           - name: rhel-7-large
             instance-type: m4.2xlarge
             cloud-image: rhel-7
